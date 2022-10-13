@@ -21,6 +21,7 @@ export class UserService {
 
     async getAllFiles(userId: number) {
         const files = await this.fileService.getAllFiles(userId);
+        console.log(1);
 
         if(files.length > 0) {
             const result = await Promise.all(files.map(async (file) => {
