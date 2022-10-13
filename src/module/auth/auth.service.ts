@@ -7,7 +7,6 @@ import { TOKEN } from '../../const/const';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User, Token } from '../../database/entities';
 import { Repository } from 'typeorm';
-import bcrypt from 'bcrypt';
 import { LoginDto } from './dto';
 
 const SALT = 10;
