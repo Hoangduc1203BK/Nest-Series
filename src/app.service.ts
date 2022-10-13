@@ -6,7 +6,9 @@ export class AppService {
   async getHello() {
     await this.cacheManager.set('cache-key', {username: 'ducbk'})
     const result = await this.cacheManager.get('cache-key')
-    console.log(result);
+
+    console.log('345');
+    console.log('123');
     return 'Hello World!';
   }
 }
