@@ -26,5 +26,8 @@ export class EventGateway  implements OnGatewayInit, OnGatewayConnection, OnGate
 
     @SubscribeMessage('join-chat-room')
     async handleMessage(@MessageBody() data:any, @ConnectedSocket() client: any) {
+        console.log(data);
+
+        return true;
     }
 }
