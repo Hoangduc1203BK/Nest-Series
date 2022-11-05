@@ -4,6 +4,9 @@ import { Injectable } from '@nestjs/common';
 export class ApiConfigService {
   constructor(private configService: ConfigService) {}
 
+  get port() {
+    return this.configService.get('PORT')
+  }
   getDBConfig() {
     return {
       type: 'postgres',
