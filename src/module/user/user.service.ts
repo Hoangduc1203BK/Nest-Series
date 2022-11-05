@@ -13,27 +13,13 @@ export class UserService {
         private readonly fileService: FileService,
     ) {}
 
-    async uploadFile(userId: number, fileName: string, data: Buffer) {
-        const result = await this.fileService.uploadFile(userId, fileName, data);
+    async getUserById(userId: number) {
+        const user = await this.userRepos.findOne({ id: userId });
 
-        return result;
-    }
-
-    async getAllFiles(userId: number) {
-        const files = await this.fileService.getAllFiles(userId);
-
-        if(files.length > 0) {
-            const result = await Promise.all(files.map(async (file) => {
-                const url = await this.fileService.generateUrl(file.key)
-                return {
-                    ...file,
-                    url
-                }
-            }))
-
-            return result;
+        if(!user) {
+            throw new Error('User not found');
         }
 
-        return [];
+        return user;
     }
 }

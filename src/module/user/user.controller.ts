@@ -11,21 +11,21 @@ import { ApiConsumes } from '@nestjs/swagger';
 export class UserController {
     constructor(private readonly userService: UserService ) {}
 
-    @UseGuards(JwtAuthGuard)
-    @ApiConsumes('multipart/form-data')
-    @UseInterceptors(FileInterceptor('file'))
-    @Post('file')
-    async addFile(@Req() req: Request, @UploadedFile() file: Express.Multer.File) {
-        const result = await this.userService.uploadFile(req.user.id, file.originalname, file.buffer);
+    // @UseGuards(JwtAuthGuard)
+    // @ApiConsumes('multipart/form-data')
+    // @UseInterceptors(FileInterceptor('file'))
+    // @Post('file')
+    // async addFile(@Req() req: Request, @UploadedFile() file: Express.Multer.File) {
+    //     const result = await this.userService.uploadFile(req.user.id, file.originalname, file.buffer);
 
-        return result;
-    }
+    //     return result;
+    // }
 
-    @UseGuards(JwtAuthGuard)
-    @Get('/file')
-    async getAllFiles(@Req() req: Request) {
-        const result = await this.userService.getAllFiles(req.user.id);
-        return result;
-    }
+    // @UseGuards(JwtAuthGuard)
+    // @Get('/file')
+    // async getAllFiles(@Req() req: Request) {
+    //     const result = await this.userService.getAllFiles(req.user.id);
+    //     return result;
+    // }
 
 }

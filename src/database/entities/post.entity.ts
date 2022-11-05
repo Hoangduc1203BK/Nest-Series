@@ -1,4 +1,5 @@
-import { BeforeUpdate, Column, Entity, ManyToOne, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeUpdate, Column, Entity, ManyToOne, JoinColumn, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { PostCategories } from './posts_categories.entity';
 import { User } from './user.entity';
 
 @Entity('posts')
@@ -35,6 +36,13 @@ export class Posts {
   content: string;
 
   @Column({
+    type: 'int',
+    name: 'user_id',
+    nullable: false,
+  })
+  userId: number;
+
+  @Column({
     name: 'created_at',
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
@@ -56,4 +64,8 @@ export class Posts {
   @ManyToOne(() => User, (user) => user.posts)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id'})
   user: User;
+
+  @OneToMany(() => PostCategories, (postCategories) => postCategories.post)
+  postCategories: PostCategories[];
+  
 }

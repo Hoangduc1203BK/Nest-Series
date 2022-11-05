@@ -5,8 +5,12 @@ import { HttpExceptionFilter } from './exception/badrequestexception';
 import { AllExceptionsFilter } from './exception/allexception';
 import { ApiConfigService } from './config/api-config.service';
 import { config } from 'aws-sdk';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+import { initAdapter } from './event/init-adapter';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule,{cors:true});
+  const app = await NestFactory.create<NestExpressApplication>(AppModule,{cors:true});
+  app.useStaticAssets(join(__dirname,'..', 'client'))
   const adapter= app.get(HttpAdapterHost)
   // app.useGlobalFilters(new HttpExceptionFilter())
   app.useGlobalFilters(new AllExceptionsFilter(adapter));
@@ -21,6 +25,8 @@ async function bootstrap() {
     accessKeyId: configService.getAWSConfig().accessKey,
     secretAccessKey: configService.getAWSConfig().secretKey,
   });
+
+  await initAdapter(app); 
   await app.listen(3000);
 }
 bootstrap();
