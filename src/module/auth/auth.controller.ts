@@ -5,6 +5,7 @@ import { JwtAuthGuard } from './guard/jwt.guard';
 import { Request, Response } from 'express';
 import { RegisterDto, LoginDto } from './dto';
 import { ApiConfigService } from '../../config/api-config.service';
+import { ChangePasswordDto } from '../user/dto';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService, private readonly configService: ApiConfigService) {}
@@ -45,4 +46,12 @@ export class AuthController {
       accessToken: result.accessToken,
     };
   }
+
+  @UseGuards(JwtAuthGuard)
+    @Post('/change-password')
+    async changePassword(@Body() data: ChangePasswordDto) {
+        const result = await this.authService.changePassword(data);
+
+        return result;
+    }
 }
