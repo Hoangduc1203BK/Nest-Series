@@ -42,4 +42,20 @@ export class ApiConfigService {
       port: this.configService.get('REDIS_PORT'),
     }
   }
-}
+
+  getCognitoConfig() {
+    const cognitoEnv = {
+      userPoolID: this.configService.get('AWS_COGNITO_POOL_ID'),
+      clientID: this.configService.get('AWS_COGNITO_CLIENT_ID'),
+      region: this.configService.get('AWS_COGNITO_REGION'),
+    }
+
+    const authority = `https://cognito-idp.${cognitoEnv.region}.amazonaws.com/${cognitoEnv.userPoolID}`
+    return {
+      ...cognitoEnv,
+      authority
+    }
+    
+    }
+  }
+

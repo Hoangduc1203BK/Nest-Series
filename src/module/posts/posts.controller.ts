@@ -11,20 +11,6 @@ export class PostController {
     private readonly postService: PostService,
     ) {}
 
-    @Get('/transaction1')
-    async transaction1() {
-      await this.postService.transaction1();
-
-      return true;
-    }
-
-    @Get('/transaction2')
-    async transaction2() {
-      const result = await this.postService.transaction2();
-
-      return result;
-    }
-
     @UseGuards(JwtAuthGuard,CheckRevokeToken)
     @UseInterceptors(HttpCacheInterceptor)
     @CacheKey('list-posts')
@@ -44,7 +30,6 @@ export class PostController {
       return result;
     }
 
-    // @UseGuards(CookieAuthenticationGuard)
     @UseGuards(JwtAuthGuard,CheckRevokeToken)
     @Post('/')
     async creatPost(@Req() req: Request,@Body() payload:CreatePostDto) {

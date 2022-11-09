@@ -12,6 +12,12 @@ export class UserController {
     constructor(private readonly userService: UserService ) {}
 
     // @UseGuards(JwtAuthGuard)
+    @Get('/')
+    async listUsers() {
+        return this.userService.listUser();
+    }
+
+    // @UseGuards(JwtAuthGuard)
     // @ApiConsumes('multipart/form-data')
     // @UseInterceptors(FileInterceptor('file'))
     // @Post('file')

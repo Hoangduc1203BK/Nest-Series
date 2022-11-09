@@ -5,29 +5,42 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../../database/entities';
+import { ApiConfigService } from 'src/config/api-config.service';
+import { passportJwtSecret } from 'jwks-rsa';
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     @InjectRepository(User)
     private readonly userRepos: Repository<User>,
+    private readonly configService: ApiConfigService,
   ) {
     super({
+      secretOrKeyProvider: passportJwtSecret({
+        cache: true,
+        rateLimit: true,
+        jwksRequestsPerMinute: 10,
+        jwksUri: `${configService.getCognitoConfig().authority}/.well-known/jwks.json`,
+      }),
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiredTokens: false,
-      secretOrKey: process.env.JWT_SECRET,
+      issuer: configService.getCognitoConfig().authority,
+      algorithms: ['RS256']
     });
   }
 
   async validate(payload: any) {
-    const user = await this.userRepos.findOne({
-      id: payload.sub,
-      email: payload.email,
-    });
+    console.log(payload);
 
-    if (!user) {
-      throw new UnauthorizedException('Unauthorized');
-    }
+    return payload;
+    // const user = await this.userRepos.findOne({
+    //   id: payload.sub,
+    //   email: payload.email,
+    // });
 
-    return user;
+    // if (!user) {
+    //   throw new UnauthorizedException('Unauthorized');
+    // }
+
+    // return user;
   }
 }

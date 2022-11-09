@@ -7,23 +7,28 @@ import { RegisterDto, LoginDto } from './dto';
 import { ApiConfigService } from '../../config/api-config.service';
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly configService: ApiConfigService
-    ) {}
+  constructor(private readonly authService: AuthService, private readonly configService: ApiConfigService) {}
 
-    @Post('register')
-    async register(@Body() payload: RegisterDto) {
-      const result = await this.authService.register(payload);
+  @Post('register')
+  async register(@Body() payload: RegisterDto) {
+    
+    const result = await this.authService.register(payload);
 
-      return result
-    }
+    return result;
+  }
+
+  @Post('authenticate')
+  async authenticate(@Body() data: any) {
+    const result = await this.authService.authenticate(data.name, data.password);
+
+    return result;
+  }
 
   @UseGuards(LocalAuthGuard)
   @Post('/login')
   async login(@Body() loginData: LoginDto, @Req() req: Request, @Res() res: Response) {
     const result = await this.authService.login(loginData);
-    const exprireTime= this.configService.getAuthConfig().refreshesTime * 24 * 60 * 60 * 1000;
+    const exprireTime = this.configService.getAuthConfig().refreshesTime * 24 * 60 * 60 * 1000;
     res.cookie('refresh_token', result.refreshToken, {
       maxAge: exprireTime,
       httpOnly: true,
@@ -37,7 +42,7 @@ export class AuthController {
     const result = await this.authService.refreshToken(refreshToken);
 
     return {
-      accessToken: result.accessToken
-    }
+      accessToken: result.accessToken,
+    };
   }
 }

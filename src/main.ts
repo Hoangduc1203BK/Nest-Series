@@ -28,8 +28,5 @@ async function bootstrap() {
 
   await initAdapter(app); 
   await app.listen(configService.port);
-  console.log(1);
-
-  console.log(2);
 }
 bootstrap();

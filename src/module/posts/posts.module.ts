@@ -16,9 +16,14 @@ import { LocalSerializer, LocalStrategy } from '../auth/strategy';
 import { AuthService } from '../auth';
 import { JwtModule } from '@nestjs/jwt';
 import { UserService } from '../user';
+import { StoreModule } from '../store/store.module';
 // import { MailService } from '../mail/mail.service';
 @Module({
   imports: [
+    StoreModule.register({
+      fileName: 'abc',
+      path: '123'
+    }),
     DatabaseModule,
     PassportModule,
     JwtModule.registerAsync({

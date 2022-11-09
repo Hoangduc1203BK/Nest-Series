@@ -9,9 +9,25 @@ import { User, Token } from '../../database/entities';
 import { Repository } from 'typeorm';
 import { LoginDto } from './dto';
 
-const SALT = 10;
+import {
+  AuthenticationDetails,
+  CognitoUser,
+  CognitoUserAttribute,
+  CognitoUserPool,
+  ICognitoUserPoolData,
+} from 'amazon-cognito-identity-js';
+import { resolve } from 'path';
+
+let poolData: ICognitoUserPoolData = {
+  UserPoolId: '{userPoolId}',
+  ClientId: '{clientId}',
+};
+
+// let userPool = new CognitoUserPool(poolData);
+
 @Injectable()
 export class AuthService {
+  private userPool: CognitoUserPool;
   constructor(
     @InjectRepository(User)
     private readonly userRepos: Repository<User>,
@@ -19,18 +35,66 @@ export class AuthService {
     @InjectRepository(Token)
     private readonly tokenRepos: Repository<Token>,
     private readonly configService: ApiConfigService,
-  ) {}
+  ) {
+    this.userPool = new CognitoUserPool({
+      UserPoolId: this.configService.getCognitoConfig().userPoolID,
+      ClientId: this.configService.getCognitoConfig().clientID,
+    });
+  }
 
   async register(payload: RegisterDto) {
-    const existUser = await this.userRepos.findOne({ email: payload.email });
-    if (existUser) {
-      throw new Error('Email already exist');
-    }
+    // const existUser = await this.userRepos.findOne({ email: payload.email });
+    // if (existUser) {
+    //   throw new Error('Email already exist');
+    // }
 
-    const result = await this.userRepos.save(payload);
-    result.password = undefined;
+    // const result = await this.userRepos.save(payload);
+    // result.password = undefined;
 
-    return result;
+    // return result;
+
+    const { name, email,phoneNumber, password } = payload;
+    return new Promise(((resolve, reject) => {
+      return this.userPool.signUp(name, password, [new CognitoUserAttribute({ Name: 'email', Value: email }), new CognitoUserAttribute( { Name: 'phone_number', Value: phoneNumber})], null, (err, result) => {
+        if (!result) {
+          reject(err);
+        } else {
+          resolve(result.user);
+        }
+      });
+    }));
+  }
+
+  async authenticate(name: string, password: string) {
+    const authenticationDetails = new AuthenticationDetails({
+      Username: name,
+      Password: password,
+    });
+
+    const { userPoolID, clientID } = this.configService.getCognitoConfig();
+    const userPool = new CognitoUserPool({
+      UserPoolId: userPoolID,
+      ClientId: clientID,
+    });
+
+    const userData = {
+      Username: name,
+      Pool: userPool,
+    };
+
+
+    const newUser = new CognitoUser(userData);
+
+    return new Promise((resolve, reject) => {
+      return newUser.authenticateUser(authenticationDetails, {
+        onSuccess: (result) => {
+          resolve(result)
+        },
+        onFailure: (err) => {
+          reject(err)
+        }
+      })
+    });
   }
 
   async validateUser(email: string, password: string) {
@@ -91,27 +155,27 @@ export class AuthService {
     }
 
     const payload = {
-        sub: user.id,
-        email: user.email,
-    }
+      sub: user.id,
+      email: user.email,
+    };
 
     const newRefreshToken = this.jwtService.sign(payload, {
-        expiresIn: moment().add(this.configService.getAuthConfig().refreshesTime, 'days').unix(),
-      });
-  
-      const newToken = this.jwtService.sign(payload);
-      await this.tokenRepos.delete(await token)
-  
-      await this.tokenRepos.save({
-        token: refreshToken,
-        userId: user.id,
-        type: TOKEN.REFRESH_TOKEN,
-        expires: moment().add(this.configService.getAuthConfig().refreshesTime, 'days').toDate(),
-      });
-  
-      return {
-        accessToken: newToken,
-        refreshToken: newRefreshToken,
-      };
+      expiresIn: moment().add(this.configService.getAuthConfig().refreshesTime, 'days').unix(),
+    });
+
+    const newToken = this.jwtService.sign(payload);
+    await this.tokenRepos.delete(await token);
+
+    await this.tokenRepos.save({
+      token: refreshToken,
+      userId: user.id,
+      type: TOKEN.REFRESH_TOKEN,
+      expires: moment().add(this.configService.getAuthConfig().refreshesTime, 'days').toDate(),
+    });
+
+    return {
+      accessToken: newToken,
+      refreshToken: newRefreshToken,
+    };
   }
 }
