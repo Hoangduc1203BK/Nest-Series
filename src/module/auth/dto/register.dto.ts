@@ -24,4 +24,15 @@ export class RegisterDto{
     @IsNotEmpty()
     @IsString()
     phoneNumber:string;
+
+
+    @ApiProperty({ required: false })
+    @IsNotEmpty()
+    @IsString()
+    birthDate:string;
+
+    @ApiProperty({ required: false })
+    @IsNotEmpty()
+    @IsString()
+    address:string;
 }
