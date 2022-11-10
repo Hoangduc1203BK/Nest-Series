@@ -1,14 +1,22 @@
+import { ConfirmPasswordDto } from './dto/confirm-password.dto';
 import { Controller, Get, Post, Body, Req, UseGuards, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guard/local.guard';
 import { JwtAuthGuard } from './guard/jwt.guard';
 import { Request, Response } from 'express';
-import { RegisterDto, LoginDto } from './dto';
+import { RegisterDto, LoginDto, ConfirmRegistrationDto } from './dto';
 import { ApiConfigService } from '../../config/api-config.service';
 import { ChangePasswordDto } from '../user/dto';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService, private readonly configService: ApiConfigService) {}
+
+  @Post('confirm-registration')
+  async confirmRegistration(@Body() payload: ConfirmRegistrationDto) {
+    const result = await this.authService.confirmRegistration(payload);
+
+    return result;
+  }
 
   @Post('register')
   async register(@Body() payload: RegisterDto) {
@@ -51,6 +59,22 @@ export class AuthController {
     @Post('/change-password')
     async changePassword(@Body() data: ChangePasswordDto) {
         const result = await this.authService.changePassword(data);
+
+        return result;
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post('/forgot-password')
+    async forgetPassword(@Body('email') email: string) {
+        const result = await this.authService.forgotPassword(email);
+
+        return result;
+    }
+
+    // @UseGuards(JwtAuthGuard)
+    @Post('/confirm-password')
+    async confirmPassword(@Body() data: ConfirmPasswordDto) {
+        const result = await this.authService.confirmNewPassword(data);
 
         return result;
     }
