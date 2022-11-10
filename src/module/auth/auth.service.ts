@@ -8,7 +8,7 @@ import { TOKEN } from '../../const/const';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User, Token } from '../../database/entities';
 import { Repository } from 'typeorm';
-import { LoginDto } from './dto';
+import { ConfirmPasswordDto, ConfirmRegistrationDto, LoginDto } from './dto';
 
 import {
   AuthenticationDetails,
@@ -17,7 +17,6 @@ import {
   CognitoUserPool,
   ICognitoUserPoolData,
 } from 'amazon-cognito-identity-js';
-
 
 @Injectable()
 export class AuthService {
@@ -66,21 +65,36 @@ export class AuthService {
     });
   }
 
+  async confirmRegistration(data: ConfirmRegistrationDto) {
+    const { email, confirmCode } = data;
+
+    const userData ={
+      Username: email,
+      Pool: this.userPool,
+    }
+
+    const userPool = new CognitoUser(userData);
+
+    return new Promise((resolve, reject) => {
+      return userPool.confirmRegistration(confirmCode,true,(err)=> {
+        if(err) {
+          reject(err);
+        } else {
+          resolve(true)
+        }
+      });
+    });
+  }
+
   async authenticate(name: string, password: string) {
     const authenticationDetails = new AuthenticationDetails({
       Username: name,
       Password: password,
     });
 
-    const { userPoolID, clientID } = this.configService.getCognitoConfig();
-    const userPool = new CognitoUserPool({
-      UserPoolId: userPoolID,
-      ClientId: clientID,
-    });
-
     const userData = {
       Username: name,
-      Pool: userPool,
+      Pool: this.userPool,
     };
 
     const newUser = new CognitoUser(userData);
@@ -97,22 +111,16 @@ export class AuthService {
     });
   }
 
-  async changePassword(data:ChangePasswordDto ) {
+  async changePassword(data: ChangePasswordDto) {
     const { email, currentPassword, newPassword } = data;
     const authenticationDetails = new AuthenticationDetails({
       Username: email,
       Password: currentPassword,
     });
 
-    const { userPoolID, clientID } = this.configService.getCognitoConfig();
-    const userPool = new CognitoUserPool({
-      UserPoolId: userPoolID,
-      ClientId: clientID,
-    });
-
     const userData = {
       Username: email,
-      Pool: userPool,
+      Pool: this.userPool,
     };
 
     const newUser = new CognitoUser(userData);
@@ -121,7 +129,7 @@ export class AuthService {
       return newUser.authenticateUser(authenticationDetails, {
         onSuccess: () => {
           newUser.changePassword(currentPassword, newPassword, (err, result) => {
-            if(err) {
+            if (err) {
               reject(err);
               return;
             }
@@ -134,7 +142,6 @@ export class AuthService {
       });
     });
   }
-
 
   async validateUser(email: string, password: string) {
     const user = await this.userRepos.findOne({ email: email, password: password });
@@ -216,5 +223,49 @@ export class AuthService {
       accessToken: newToken,
       refreshToken: newRefreshToken,
     };
+  }
+
+  async forgotPassword(email: string) {
+    const userData = {
+      Username: email,
+      Pool: this.userPool,
+    };
+
+    const userPool = new CognitoUser(userData);
+
+    return new Promise((resolve, reject) => {
+      return userPool.forgotPassword({
+        onSuccess: (result) => {
+          console.log(result);
+          resolve(result);
+        },
+        onFailure: (err) => {
+          reject(err);
+        },
+      });
+    });
+  }
+
+
+  async confirmNewPassword(confirmPassword: ConfirmPasswordDto) {
+    const { email, confirmCode, newPassword } = confirmPassword;
+
+    const userData = {
+      Username: email,
+      Pool: this.userPool,
+    };
+
+    const userPool = new CognitoUser(userData);
+
+    return new Promise((resolve, reject) => {
+      return userPool.confirmPassword(confirmCode, newPassword,{
+        onSuccess: (result) => {
+          resolve(result);
+        },
+        onFailure: (err) => {
+          reject(err);
+        },
+      });
+    });
   }
 }

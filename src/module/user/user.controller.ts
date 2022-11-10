@@ -14,7 +14,8 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     @Get('/')
     async listUsers() {
-        return this.userService.listUser();
+        // return this.userService.listUser();
+        return true;
     }
 
     // @UseGuards(JwtAuthGuard)
