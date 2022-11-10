@@ -8,6 +8,7 @@ import { PostModule, AuthModule, UserModule,PrivateFilesModule, CategoriesModule
 import { RedisModule } from './redis/redis.module';
 import * as redisStore from 'cache-manager-redis-store';
 import { SocketStateModule } from './event/socket-state/socket-state.module';
+import { StudentModule } from './module/student/student.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -29,6 +30,7 @@ import { SocketStateModule } from './event/socket-state/socket-state.module';
     // })
     RedisModule,
     EventGatewayModule,
+    StudentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

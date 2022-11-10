@@ -1,3 +1,4 @@
+import { AuthModule } from './../auth/auth.module';
 import { RedisModule } from './../../redis/redis.module';
 import { FileService } from '../upload/upload.service';
 import { ApiConfigService } from '../../config/api-config.service';

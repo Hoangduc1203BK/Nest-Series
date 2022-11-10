@@ -1,7 +1,7 @@
 import { JwtAuthGuard } from './../auth/guard/jwt.guard';
 import { Body, Controller, Get, Post, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UploadFileDto } from './dto';
+import { ChangePasswordDto, UploadFileDto } from './dto';
 import { Request } from  'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
@@ -11,10 +11,11 @@ import { ApiConsumes } from '@nestjs/swagger';
 export class UserController {
     constructor(private readonly userService: UserService ) {}
 
-    // @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard)
     @Get('/')
     async listUsers() {
-        return this.userService.listUser();
+        // return this.userService.listUser();
+        return true;
     }
 
     // @UseGuards(JwtAuthGuard)

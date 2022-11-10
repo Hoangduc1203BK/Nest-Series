@@ -1,3 +1,4 @@
+import { ChangePasswordDto } from './dto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -7,7 +8,7 @@ import { FileService } from '../upload/upload.service';
 import { UploadFileDto } from './dto';
 import { CognitoIdentityServiceProvider } from 'aws-sdk';
 import { ApiConfigService } from 'src/config/api-config.service';
-import { resolve } from 'path';
+import { AuthService } from '../auth';
 @Injectable()
 export class UserService {
     constructor(
@@ -15,7 +16,7 @@ export class UserService {
         private readonly userRepos: Repository<User>,
         private readonly configService: ApiConfigService,
         private readonly fileService: FileService,
-        private readonly storeSevice: StoreService
+        private readonly storeSevice: StoreService,
     ) {}
 
     async getUserById(userId: number) {

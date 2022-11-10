@@ -7,6 +7,7 @@ import { User,File } from '../../database/entities';
 import { JwtStrategy } from '../auth/strategy/jwt-strategy';
 import { StoreModule } from '../store/store.module';
 import { StoreService } from '../store/store.service';
+import { AuthModule } from '../auth';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User,File]),
@@ -14,7 +15,7 @@ import { StoreService } from '../store/store.service';
     StoreModule.register({
       path: 'store',
       fileName: 'user'
-    })
+    }),
   ],
   controllers: [UserController],
   providers: [UserService, JwtStrategy],
