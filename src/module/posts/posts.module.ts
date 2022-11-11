@@ -9,22 +9,17 @@ import { CACHE_MANAGER, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseModule } from '../../database/database.module';
 import { Posts, User, Token, File } from '../../database/entities';
-// import { File } from '../../../database/sql/entities/file.entity';
 import { PostController } from './posts.controller';
 import { PostService } from './posts.service';
-import { JwtStrategy } from '../auth/strategy/jwt-strategy';
 import { LocalSerializer, LocalStrategy } from '../auth/strategy';
 import { AuthService } from '../auth';
 import { JwtModule } from '@nestjs/jwt';
 import { UserService } from '../user';
-import { StoreModule } from '../store/store.module';
+import { DynamooseModule } from 'nestjs-dynamoose';
+import { PostSchema, UserSchema } from '../../database/schema';
 // import { MailService } from '../mail/mail.service';
 @Module({
   imports: [
-    StoreModule.register({
-      fileName: 'abc',
-      path: '123'
-    }),
     DatabaseModule,
     PassportModule,
     JwtModule.registerAsync({
@@ -38,6 +33,7 @@ import { StoreModule } from '../store/store.module';
       inject: [ApiConfigService],
     }),
     TypeOrmModule.forFeature([Posts, User, Token, File]),
+    DynamooseModule.forFeature([{ name: 'User', schema: UserSchema}, { name: 'Post', schema: PostSchema}])
   ],
   controllers: [PostController],
   providers: [PostService, AuthService, UserService, FileService, LocalStrategy, LocalSerializer],

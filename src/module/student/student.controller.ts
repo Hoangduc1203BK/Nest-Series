@@ -12,4 +12,11 @@ export class StudentController {
 
         return result;
     }
+
+    @Post('/')
+    async createStudent() {
+        const result = await this.studentService.createStudent();
+
+        return result;
+    }
 }

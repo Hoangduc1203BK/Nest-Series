@@ -236,7 +236,6 @@ export class AuthService {
     return new Promise((resolve, reject) => {
       return userPool.forgotPassword({
         onSuccess: (result) => {
-          console.log(result);
           resolve(result);
         },
         onFailure: (err) => {

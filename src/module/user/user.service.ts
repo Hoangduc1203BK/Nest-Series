@@ -1,55 +1,49 @@
-import { ChangePasswordDto } from './dto';
+import { ListUserDto } from './dto';
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from '../../database/entities';
-import { StoreService } from '../store/store.service';
-import { FileService } from '../upload/upload.service';
-import { UploadFileDto } from './dto';
-import { CognitoIdentityServiceProvider } from 'aws-sdk';
 import { ApiConfigService } from 'src/config/api-config.service';
-import { AuthService } from '../auth';
+import { InjectModel, Model } from 'nestjs-dynamoose';
+import { UserKey, User } from './interface/user.interface';
+import { v4 as uuidv4 } from 'uuid';
+import { DEFAULT_PAGING } from '../../const/const';
+import { GetUserDto } from './dto/get-user.dto';
 @Injectable()
 export class UserService {
-    constructor(
-        @InjectRepository(User)
-        private readonly userRepos: Repository<User>,
-        private readonly configService: ApiConfigService,
-        private readonly fileService: FileService,
-        private readonly storeSevice: StoreService,
-    ) {}
+  constructor(
+    private readonly configService: ApiConfigService,
+    @InjectModel('User') private userModel: Model<User, UserKey>,
+  ) {}
 
-    async getUserById(userId: number) {
-        const user = await this.userRepos.findOne({ id: userId });
-
-        if(!user) {
-            throw new Error('User not found');
-        }
-
-        return user;
+  async getUser(payload: GetUserDto) {
+    const result = await this.userModel.scan(payload).exec();
+    if (result.length===0) {
+      throw new Error('User not found');
     }
 
-    async listUser() {
-        // await this.storeSevice.save()
-        // const users = await this.userRepos.find();
+    return result[0];
+  }
 
-        // return users;
+  async createUser(payload: User): Promise<User> {
+    const doc = {
+      id: uuidv4(),
+      ...payload,
+    };
+    const result = await this.userModel.create(doc);
 
-        const { region, authority, userPoolID } = this.configService.getCognitoConfig();
-        const provider = new CognitoIdentityServiceProvider({
-            region, 
-            endpoint: authority,
-        });
+    return result;
+  }
+  async listUser(query: ListUserDto) {
+    const { page = DEFAULT_PAGING.PAGE, limit = DEFAULT_PAGING.LIMIT } = query;
 
-        try {
-            const result = await provider.listUsers({
-                UserPoolId: userPoolID
-            }).promise()
+    const skip = (page - 1) * limit;
+    const result = await this.userModel.scan().limit(query.limit).exec();
 
-            console.log('result:::',result);
-            return result;
-        } catch (error) {
-            throw new Error(error)
-        }
-    }
+    return result;
+  }
+
+  async updateUser(id: string, data: Partial<User>): Promise<User> {
+    const user = await this.getUser({id});
+    const result = await this.userModel.update({ id: user.id}, { ...data });
+
+    return result;
+  }
 }

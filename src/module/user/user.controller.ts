@@ -1,21 +1,33 @@
 import { JwtAuthGuard } from './../auth/guard/jwt.guard';
-import { Body, Controller, Get, Post, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ChangePasswordDto, UploadFileDto } from './dto';
+import { ChangePasswordDto, ListUserDto, UpdateUserDto, UploadFileDto } from './dto';
 import { Request } from  'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
 import { ApiConsumes } from '@nestjs/swagger';
+import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './interface/user.interface';
+import { ParseNumberQueryPipe } from '../../core/pipe';
 
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService ) {}
 
-    @UseGuards(JwtAuthGuard)
+    // @UseGuards(JwtAuthGuard)
     @Get('/')
-    async listUsers() {
-        // return this.userService.listUser();
-        return true;
+    async listUsers(@Query(ParseNumberQueryPipe) query: ListUserDto) {
+        return this.userService.listUser(query);
+    }
+
+    @Post('/')
+    async createUser(@Body() data: any) {
+        return this.userService.createUser(data);
+    }
+
+    @Patch('/:id')
+    async updateUser(@Param('id') id: string,@Body() data:Partial<User>) {
+        return this.userService.updateUser(id, data)
     }
 
     // @UseGuards(JwtAuthGuard)

@@ -60,9 +60,9 @@ export class ApiConfigService {
 
     getDynamoConfig() {
       return {
-        accessID: this.configService.get('AWS_DYNAMODB_ACCESS_KEY_ID'),
-        secretKey: this.configService.get('cQN8PHlIkLN4gtVko5sIsZ3UyHxMVQPTOoSvVQWT'),
-        region: this.configService.get('AWS_DYNAMODB_REGION'),
+        accessID: this.configService.get('AWS_ACCESS_KEY_ID'),
+        secretKey: this.configService.get('AWS_SECRET_ACCESS_KEY'),
+        region: this.configService.get('AWS_REGION'),
       }
     }
   }

@@ -5,17 +5,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserService } from './user.service';
 import { User,File } from '../../database/entities';
 import { JwtStrategy } from '../auth/strategy/jwt-strategy';
-import { StoreModule } from '../store/store.module';
-import { StoreService } from '../store/store.service';
 import { AuthModule } from '../auth';
+import { DynamooseModule } from 'nestjs-dynamoose';
+import { UserSchema } from '../../database/schema';
+
+const schema = [
+  { name: 'User', schema: UserSchema}
+]
 @Module({
   imports: [
     TypeOrmModule.forFeature([User,File]),
+    DynamooseModule.forFeature(schema),
     PrivateFilesModule,
-    StoreModule.register({
-      path: 'store',
-      fileName: 'user'
-    }),
   ],
   controllers: [UserController],
   providers: [UserService, JwtStrategy],
