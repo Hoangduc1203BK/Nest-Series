@@ -6,11 +6,14 @@ import { UserKey, User } from './interface/user.interface';
 import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_PAGING } from '../../const/const';
 import { GetUserDto } from './dto/get-user.dto';
+import { PostService } from '../posts';
+import { PostKey, Posts } from '../posts/interface/post.interface';
 @Injectable()
 export class UserService {
   constructor(
     private readonly configService: ApiConfigService,
-    @InjectModel('User') private userModel: Model<User, UserKey>,
+    @InjectModel('Users') private userModel: Model<User, UserKey>,
+    @InjectModel('Users') private postModel: Model<Posts, PostKey>,
   ) {}
 
   async getUser(payload: GetUserDto) {
@@ -32,10 +35,21 @@ export class UserService {
     return result;
   }
   async listUser(query: ListUserDto) {
+    console.log(1);
     const { page = DEFAULT_PAGING.PAGE, limit = DEFAULT_PAGING.LIMIT } = query;
 
     const skip = (page - 1) * limit;
-    const result = await this.userModel.scan().limit(query.limit).exec();
+    const users = await this.userModel.scan().limit(query.limit).exec();
+    let result = [];
+    for(let user of users) {
+      const posts = await this.postModel.scan({id: user.id}).exec();
+      console.log(posts);
+
+      result.push({
+        user,
+        ...posts
+      })
+    }
 
     return result;
   }

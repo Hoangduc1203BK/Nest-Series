@@ -1,7 +1,7 @@
 import { CheckRevokeToken } from '../auth/guard/check-revoke-token.guard';
 import { HttpCacheInterceptor } from '../../core/interceptors/cache.interceptor';
-import { CreatePostDto } from './dto';
-import { Controller, Get, Post, Body, Req, UseGuards, Res, Param, UseInterceptors, CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/common';
+import { CreatePostDto, ListPostDto } from './dto';
+import { Controller, Get, Post, Body, Req, UseGuards, Res, Param, UseInterceptors, CacheInterceptor, CacheKey, CacheTTL, Query } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guard/jwt.guard';
 import { PostService } from './posts.service';
 import { Request } from 'express';
@@ -12,6 +12,11 @@ export class PostController {
     private readonly postService: PostService,
     ) {}
 
+    @Get('/all-post')
+    async allPost(@Query() data:ListPostDto) {
+      const result = await this.postService.allPost(data);
+    }
+    
     @UseGuards(JwtAuthGuard)
     @Post('/')
     async creatPost(@Req() req: Request,@Body() payload: CreatePostDto) {
@@ -25,6 +30,13 @@ export class PostController {
     @Get('/')
     async listPost(@Req() req: Request) {
       const result = await this.postService.listPost(req.user.email)
+
+      return result;
+    }
+
+    @Get('/:id')
+    async getPost(@Param('id') id: string) {
+      const result = await this.postService.getPost(id)
 
       return result;
     }

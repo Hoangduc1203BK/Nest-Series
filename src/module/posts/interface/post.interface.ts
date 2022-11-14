@@ -6,5 +6,5 @@ export interface Posts extends PostKey {
   title: string;
   content: string;
   user_id: string,
-  categories: string[],
+  categories_ids: string[],
 }

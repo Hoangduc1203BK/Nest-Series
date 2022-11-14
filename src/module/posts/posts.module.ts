@@ -33,7 +33,7 @@ import { PostSchema, UserSchema } from '../../database/schema';
       inject: [ApiConfigService],
     }),
     TypeOrmModule.forFeature([Posts, User, Token, File]),
-    DynamooseModule.forFeature([{ name: 'User', schema: UserSchema}, { name: 'Post', schema: PostSchema}])
+    DynamooseModule.forFeature([{ name: 'Users', schema: UserSchema}, { name: 'Post', schema: PostSchema}])
   ],
   controllers: [PostController],
   providers: [PostService, AuthService, UserService, FileService, LocalStrategy, LocalSerializer],

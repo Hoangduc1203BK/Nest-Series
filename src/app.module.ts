@@ -4,9 +4,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
-import { PostModule, AuthModule, UserModule,PrivateFilesModule  } from './module';
+import { PostModule, AuthModule, UserModule,PrivateFilesModule, CategoriesModule, CommentModule  } from './module';
 import { RedisModule } from './redis/redis.module';
-import * as redisStore from 'cache-manager-redis-store';
 import { SocketStateModule } from './event/socket-state/socket-state.module';
 import { StudentModule } from './module/student/student.module';
 @Module({
@@ -24,6 +23,8 @@ import { StudentModule } from './module/student/student.module';
     RedisModule,
     EventGatewayModule,
     StudentModule,
+    CategoriesModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

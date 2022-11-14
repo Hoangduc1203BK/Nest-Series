@@ -11,11 +11,8 @@ export class StudentService {
   }
 
   async getStudent() {
-    const result = await this.db
-      .scan({
-        TableName: 'student',
-      })
-      .promise();
+    const dynamodb = new AWS.DynamoDB();
+    const result = await dynamodb.executeStatement({Statement: 'select * from User'}).promise()
 
     return result;
   }

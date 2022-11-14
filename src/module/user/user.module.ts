@@ -7,10 +7,11 @@ import { User,File } from '../../database/entities';
 import { JwtStrategy } from '../auth/strategy/jwt-strategy';
 import { AuthModule } from '../auth';
 import { DynamooseModule } from 'nestjs-dynamoose';
-import { UserSchema } from '../../database/schema';
+import { PostSchema, UserSchema } from '../../database/schema';
 
 const schema = [
-  { name: 'User', schema: UserSchema}
+  { name: 'Users', schema: UserSchema},
+  { name: 'Post', schema: PostSchema}
 ]
 @Module({
   imports: [

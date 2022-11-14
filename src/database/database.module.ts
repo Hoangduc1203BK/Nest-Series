@@ -4,9 +4,6 @@ import { ApiConfigService } from '../config/api-config.service';
 import { SharedModule } from '../config/share.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DynamooseModule } from 'nestjs-dynamoose';
-import { config } from 'process';
-import { ConfigService } from 'aws-sdk';
-import { PostSchema, UserSchema } from './schema';
 
 
 @Module({

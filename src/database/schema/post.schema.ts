@@ -15,7 +15,7 @@ export const PostSchema = new Schema(
       type: String,
       required: true,
     },
-    categories: {
+    categories_ids: {
       type: Array<String>,
       required: true,
     },

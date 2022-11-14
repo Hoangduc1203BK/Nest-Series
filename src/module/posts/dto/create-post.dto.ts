@@ -15,5 +15,5 @@ export class CreatePostDto{
     @ApiProperty({ required: true })
     @IsNotEmpty()
     @IsArray()
-    categories: string[];
+    categories_ids: string[];
 }
