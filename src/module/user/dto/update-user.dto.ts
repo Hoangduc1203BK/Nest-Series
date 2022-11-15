@@ -13,6 +13,12 @@ export class UpdateUserDto{
     @IsString()
     @IsOptional()
     username:string;
+
+    @ApiProperty({ required: false })
+    @IsNotEmpty()
+    @IsString()
+    @IsOptional()
+    phoneNumber:string;
     
     @ApiProperty({ required: false })
     @IsNotEmpty()

@@ -26,6 +26,7 @@ export class StudentService {
       },
       TableName: 'student',
     };
+
     return new Promise((resolve, reject) => {
     this.db.put(payload, (err, data) => {
         if (err) {

@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ApiConfigService } from '../config/api-config.service';
 import { SharedModule } from '../config/share.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DynamooseModule } from 'nestjs-dynamoose';
+import { DynamoDBConfig } from './database.config';
 
 
 @Module({
@@ -27,19 +27,8 @@ import { DynamooseModule } from 'nestjs-dynamoose';
         ],
       })
     }),
-    DynamooseModule.forRootAsync({
-      imports: [ConfigModule, SharedModule],
-      inject: [ApiConfigService],
-      useFactory: (configService: ApiConfigService) => ({
-        aws: {
-          accessKeyId: configService.getDynamoConfig().accessID,
-          secretAccessKey: configService.getDynamoConfig().secretKey,
-          region: configService.getDynamoConfig().region,
-        },
-      })
-    }),
   ],
-  providers: [ApiConfigService],
-  exports: [],
+  providers: [ApiConfigService, DynamoDBConfig],
+  exports: [DynamoDBConfig],
 })
 export class DatabaseModule {}

@@ -8,11 +8,12 @@ import { config } from 'aws-sdk';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { initAdapter } from './event/init-adapter';
+import * as dynamo from 'dynamodb';
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule,{cors:true});
   app.useStaticAssets(join(__dirname,'..', 'client'))
   const adapter= app.get(HttpAdapterHost)
-  // app.useGlobalFilters(new HttpExceptionFilter())
   app.useGlobalFilters(new AllExceptionsFilter(adapter));
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api');
@@ -22,9 +23,12 @@ async function bootstrap() {
   })
   const configService = app.get(ApiConfigService);
   config.update({
-    accessKeyId: configService.getAWSConfig().accessKey,
-    secretAccessKey: configService.getAWSConfig().secretKey,
+    accessKeyId: configService.getDynamoConfig().accessID,
+    secretAccessKey: configService.getDynamoConfig().secretKey,
+    region: configService.getDynamoConfig().region,
   });
+
+  
 
   await initAdapter(app); 
   await app.listen(configService.port);
