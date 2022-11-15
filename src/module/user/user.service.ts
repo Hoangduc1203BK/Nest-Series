@@ -8,6 +8,7 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { DEFAULT_PAGING } from '../../const/const';
 import { TABLENAME } from '../../const/table';
 import { Categories } from 'src/database/schemas/categories.schema';
+import { raw } from '@nestjs/mongoose';
 @Injectable()
 export class UserService {
   private db: DocumentClient;
@@ -66,16 +67,23 @@ export class UserService {
     if(!user) {
       throw new Error('User not found');
     }
+    let rawQr = 'set '
+    let attributeValues = {};
 
-    const doc = {
-      ...user,
-      mtime: Date.now()
+    for(let [k,v] of Object.entries(data)) {
+      rawQr += ` ${k} = :${k}, `
+
+      attributeValues = {
+        ...attributeValues,
+        [`:${k}`]: v,
+      }
     }
 
     const params = {
-      Item: doc,
       Key: { id },
-      UpdateExpression:'set age = 30',
+      UpdateExpression: rawQr.substring(0, rawQr.length-2),
+      ExpressionAttributeValues: attributeValues,
+      ReturnValues: 'ALL_NEW',
       TableName: TABLENAME.USERS,
     }
     const result = await this.db.update(params).promise()
