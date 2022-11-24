@@ -3,7 +3,6 @@ import { ConfigModule } from '@nestjs/config';
 import { ApiConfigService } from '../config/api-config.service';
 import { SharedModule } from '../config/share.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DynamoDBConfig } from './database.config';
 
 
 @Module({
@@ -19,7 +18,7 @@ import { DynamoDBConfig } from './database.config';
         password: configService.getDBConfig().password,
         database: configService.getDBConfig().database,
         
-        synchronize: false,
+        synchronize: true,
         keepConnectionAlive: true,
         entities: [
           // `${rootDir}/databases/entities/index.{js,ts}`,
@@ -28,7 +27,7 @@ import { DynamoDBConfig } from './database.config';
       })
     }),
   ],
-  providers: [ApiConfigService, DynamoDBConfig],
-  exports: [DynamoDBConfig],
+  providers: [ApiConfigService],
+  exports: [],
 })
 export class DatabaseModule {}

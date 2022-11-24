@@ -31,6 +31,30 @@ export class User {
   @Column({
     type: 'varchar',
     length: '50',
+    name: 'birth_date',
+    nullable: false,
+  })
+  birthDate: string;
+
+  @Column({
+    type: 'varchar',
+    length: '50',
+    name: 'address',
+    nullable: false,
+  })
+  address: string;
+
+  @Column({
+    type: 'varchar',
+    length: '50',
+    name: 'phone_number',
+    nullable: false,
+  })
+  phoneNumber: string;
+
+  @Column({
+    type: 'varchar',
+    length: '50',
     name: 'password',
     nullable: false,
   })

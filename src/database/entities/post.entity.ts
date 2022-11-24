@@ -1,5 +1,4 @@
 import { BeforeUpdate, Column, Entity, ManyToOne, JoinColumn, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { PostCategories } from './posts_categories.entity';
 import { User } from './user.entity';
 
 @Entity('posts')
@@ -18,14 +17,6 @@ export class Posts {
     nullable: false,
   })
   title: string;
-
-  @Column({
-    type: 'varchar',
-    length: '50',
-    name: 'author',
-    nullable: false,
-  })
-  author: string;
 
   @Column({
     type: 'varchar',
@@ -64,8 +55,4 @@ export class Posts {
   @ManyToOne(() => User, (user) => user.posts)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id'})
   user: User;
-
-  @OneToMany(() => PostCategories, (postCategories) => postCategories.post)
-  postCategories: PostCategories[];
-  
 }

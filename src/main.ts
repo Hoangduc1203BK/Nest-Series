@@ -8,7 +8,6 @@ import { config } from 'aws-sdk';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { initAdapter } from './event/init-adapter';
-import * as dynamo from 'dynamodb';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule,{cors:true});
@@ -22,13 +21,6 @@ async function bootstrap() {
     type: VersioningType.URI,
   })
   const configService = app.get(ApiConfigService);
-  config.update({
-    accessKeyId: configService.getDynamoConfig().accessID,
-    secretAccessKey: configService.getDynamoConfig().secretKey,
-    region: configService.getDynamoConfig().region,
-  });
-
-  
 
   await initAdapter(app); 
   await app.listen(configService.port);

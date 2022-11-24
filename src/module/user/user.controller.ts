@@ -1,50 +1,55 @@
-import { JwtAuthGuard } from './../auth/guard/jwt.guard';
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { UserService } from './user.service';
-import { ChangePasswordDto, ListUserDto, UpdateUserDto, UploadFileDto } from './dto';
-import { CreateUserDto } from './dto/create-user.dto';
-import { ParseNumberQueryPipe } from '../../core/pipe';
-
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
+import { Request } from "express";
+import { JwtAuthGuard } from "../auth/guard/jwt.guard";
+import { CreateUserDto, ListUserDto, UpdateUserDto } from './dto';
+import { UserService } from "./user.service";
 @Controller('user')
 export class UserController {
-    constructor(private readonly userService: UserService ) {}
+    constructor(private readonly userService: UserService) {}
 
-    // @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard)
+    @Get('/me')
+    async getMe(@Req() req: Request) {
+        const user = await this.userService.getUser({ id: req.user.id});
+
+        return user;
+    }
+    
     @Get('/')
-    async listUsers(@Query(ParseNumberQueryPipe) query: ListUserDto) {
-        return this.userService.listUser(query);
+    async listUser(@Query() data: ListUserDto) {
+        const users = await this.userService.listUser(data);
+
+        return users;
     }
 
     @Get('/:id')
-    async getUser(@Param('id') id: string) {
-        return this.userService.getUser({ id: id});
+    async getUser(@Param('id') id: number) {
+        const user = await this.userService.getUser({ id });
+
+        return user;
     }
 
     @Post('/')
     async createUser(@Body() data: CreateUserDto) {
-        return this.userService.createUser(data);
+        const user = await this.userService.createUser(data);
+
+        return user;
     }
 
+    @UseGuards(JwtAuthGuard)
     @Patch('/:id')
-    async updateUser(@Param('id') id: string,@Body() data) {
-        return this.userService.updateUser(id, data)
+    async updateUser(@Param('id') id: number, @Body() data: UpdateUserDto) {
+        const user = await this.userService.updateUser(id, data);
+
+        return user;
     }
 
-    // @UseGuards(JwtAuthGuard)
-    // @ApiConsumes('multipart/form-data')
-    // @UseInterceptors(FileInterceptor('file'))
-    // @Post('file')
-    // async addFile(@Req() req: Request, @UploadedFile() file: Express.Multer.File) {
-    //     const result = await this.userService.uploadFile(req.user.id, file.originalname, file.buffer);
+    @Delete('/:id')
+    async deleteUser(@Param('id') id: string) {
+        await this.userService.deleteUser(id);
 
-    //     return result;
-    // }
-
-    // @UseGuards(JwtAuthGuard)
-    // @Get('/file')
-    // async getAllFiles(@Req() req: Request) {
-    //     const result = await this.userService.getAllFiles(req.user.id);
-    //     return result;
-    // }
-
+        return {
+            success: true
+        }
+    }
 }

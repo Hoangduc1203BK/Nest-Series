@@ -5,25 +5,31 @@ export class CreateUserDto{
     @ApiProperty({ required: true })
     @IsNotEmpty()
     @IsString()
+    @IsEmail()
     email:string;
 
     @ApiProperty({ required: true })
     @IsNotEmpty()
     @IsString()
-    phoneNumber:string;
+    name:string;
 
     @ApiProperty({ required: true })
     @IsNotEmpty()
     @IsString()
-    username:string;
+    password:string;
+
+    @ApiProperty({ required: true })
+    @IsNotEmpty()
+    @IsString()
+    birthDate:string;
+
+    @ApiProperty({ required: true })
+    @IsNotEmpty()
+    @IsString()
+    address:string;
     
     @ApiProperty({ required: true })
     @IsNotEmpty()
-    @IsNumber()
-    age:number;
-
-    @ApiProperty({ required: true })
-    @IsNotEmpty()
     @IsString()
-    address: string;
+    phoneNumber:string;
 }

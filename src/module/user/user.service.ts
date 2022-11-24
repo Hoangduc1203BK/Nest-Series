@@ -1,93 +1,47 @@
-import { CreateUserDto, ListUserDto, UpdateUserDto } from './dto';
 import { Injectable } from '@nestjs/common';
-import { ApiConfigService } from 'src/config/api-config.service';
-import { v4 as uuidv4 } from 'uuid';
-import { GetUserDto } from './dto/get-user.dto';
-import { DynamoDBConfig } from '../../database/database.config';
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-import { DEFAULT_PAGING } from '../../const/const';
-import { TABLENAME } from '../../const/table';
-import { Categories } from 'src/database/schemas/categories.schema';
-import { raw } from '@nestjs/mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/database/entities';
+import { Repository } from 'typeorm';
+import { CreateUserDto, GetUserDto, ListUserDto } from './dto';
+
 @Injectable()
 export class UserService {
-  private db: DocumentClient;
-  constructor(private readonly configService: ApiConfigService, private readonly dynamodbConfig: DynamoDBConfig) {
-    this.db = dynamodbConfig.getInstance();
-  }
+  constructor(
+    @InjectRepository(User)
+    private userRepos: Repository<User>,
+  ) {}
 
-  async getUser(payload: GetUserDto) {
-    const result = await this.db
-      .get({
-        TableName: TABLENAME.USERS,
-        Key: {
-          ...payload,
-        },
-      })
-      .promise();
+  async getUser(data: GetUserDto) {
+    const user = await this.userRepos.findOne(data);
 
-    if (!result.Item) {
+    if (!user) {
       throw new Error('User not found');
     }
 
-    return result.Item;
+    return user;
   }
 
-  async createUser(payload: CreateUserDto) {
-    const doc = {
-      Item: {
-        id: uuidv4(),
-        ...payload,
-        ctime: Date.now(),
-        mtime: Date.now(),
-      },
-      TableName: TABLENAME.USERS,
-    };
+  async getUserByAuth(data: GetUserDto) {
+    const user = await this.userRepos.findOne(data);
 
-    const result = await this.db.put(doc).promise();
-
-    return result;
-  }
-  async listUser(query: ListUserDto) {
-    const { page = DEFAULT_PAGING.PAGE, limit = DEFAULT_PAGING.LIMIT } = query;
-    const skip = (page - 1) * limit;
-
-    const params = {
-      TableName: TABLENAME.USERS,
-      Limit: limit,
-    };
-    const users = await this.db.scan(params).promise();
-
-    return users.Items;
+    return user;
   }
 
-  async updateUser(id: string, data: UpdateUserDto) {
+  async listUser(data: ListUserDto) {}
+
+  async createUser(data: CreateUserDto) {
+    const user = await this.userRepos.save(data);
+
+    return user;
+  }
+
+  async updateUser(id: number, data: any) {
     const user = await this.getUser({ id });
 
-    if(!user) {
-      throw new Error('User not found');
-    }
-    let rawQr = 'set '
-    let attributeValues = {};
+    return this.userRepos.update(user.id, data);
+  }
 
-    for(let [k,v] of Object.entries(data)) {
-      rawQr += ` ${k} = :${k}, `
-
-      attributeValues = {
-        ...attributeValues,
-        [`:${k}`]: v,
-      }
-    }
-
-    const params = {
-      Key: { id },
-      UpdateExpression: rawQr.substring(0, rawQr.length-2),
-      ExpressionAttributeValues: attributeValues,
-      ReturnValues: 'ALL_NEW',
-      TableName: TABLENAME.USERS,
-    }
-    const result = await this.db.update(params).promise()
-
-    return result;
+  async deleteUser(id: string) {
+    // await
   }
 }

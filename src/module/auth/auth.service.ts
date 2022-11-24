@@ -17,139 +17,116 @@ import {
   CognitoUserPool,
   ICognitoUserPoolData,
 } from 'amazon-cognito-identity-js';
+import { UserService } from '../user';
 
 @Injectable()
 export class AuthService {
   private userPool: CognitoUserPool;
   constructor(
-    @InjectRepository(User)
-    private readonly userRepos: Repository<User>,
+    private readonly userService: UserService,
     private readonly jwtService: JwtService,
     @InjectRepository(Token)
     private readonly tokenRepos: Repository<Token>,
     private readonly configService: ApiConfigService,
-  ) {
-    this.userPool = new CognitoUserPool({
-      UserPoolId: this.configService.getCognitoConfig().userPoolID,
-      ClientId: this.configService.getCognitoConfig().clientID,
-    });
-  }
+  ) {}
 
   async register(payload: RegisterDto) {
-    // const existUser = await this.userRepos.findOne({ email: payload.email });
-    // if (existUser) {
-    //   throw new Error('Email already exist');
-    // }
-
-    // const result = await this.userRepos.save(payload);
-    // result.password = undefined;
-
-    // return result;
-
-    const { name, email, phoneNumber, password, birthDate, address } = payload;
-
-    const attributes = [
-      new CognitoUserAttribute({ Name: 'email', Value: email }),
-      new CognitoUserAttribute({ Name: 'birthdate', Value: birthDate }),
-      new CognitoUserAttribute({ Name: 'phone_number', Value: phoneNumber }),
-      new CognitoUserAttribute({ Name: 'address', Value: address }),
-    ];
-    return new Promise((resolve, reject) => {
-      return this.userPool.signUp(name, password, attributes, null, (err, result) => {
-        if (!result) {
-          reject(err);
-        } else {
-          resolve(result.user);
-        }
-      });
-    });
-  }
-
-  async confirmRegistration(data: ConfirmRegistrationDto) {
-    const { email, confirmCode } = data;
-
-    const userData ={
-      Username: email,
-      Pool: this.userPool,
+    const existUser = await this.userService.getUserByAuth( { email: payload.email} );
+    if (existUser) {
+      throw new Error('Email already exist');
     }
 
-    const userPool = new CognitoUser(userData);
+    const result = await this.userService.createUser(payload);
+    result.password = undefined;
 
-    return new Promise((resolve, reject) => {
-      return userPool.confirmRegistration(confirmCode,true,(err)=> {
-        if(err) {
-          reject(err);
-        } else {
-          resolve(true)
-        }
-      });
-    });
+    return result;
   }
 
-  async authenticate(name: string, password: string) {
-    const authenticationDetails = new AuthenticationDetails({
-      Username: name,
-      Password: password,
-    });
+  // async confirmRegistration(data: ConfirmRegistrationDto) {
+  //   const { email, confirmCode } = data;
 
-    const userData = {
-      Username: name,
-      Pool: this.userPool,
-    };
+  //   const userData ={
+  //     Username: email,
+  //     Pool: this.userPool,
+  //   }
 
-    const newUser = new CognitoUser(userData);
+  //   const userPool = new CognitoUser(userData);
 
-    return new Promise((resolve, reject) => {
-      return newUser.authenticateUser(authenticationDetails, {
-        onSuccess: (result) => {
-          resolve(result);
-        },
-        onFailure: (err) => {
-          reject(err);
-        },
-      });
-    });
-  }
+  //   return new Promise((resolve, reject) => {
+  //     return userPool.confirmRegistration(confirmCode,true,(err)=> {
+  //       if(err) {
+  //         reject(err);
+  //       } else {
+  //         resolve(true)
+  //       }
+  //     });
+  //   });
+  // }
 
-  async changePassword(data: ChangePasswordDto) {
-    const { email, currentPassword, newPassword } = data;
-    const authenticationDetails = new AuthenticationDetails({
-      Username: email,
-      Password: currentPassword,
-    });
+  // async authenticate(name: string, password: string) {
+  //   const authenticationDetails = new AuthenticationDetails({
+  //     Username: name,
+  //     Password: password,
+  //   });
 
-    const userData = {
-      Username: email,
-      Pool: this.userPool,
-    };
+  //   const userData = {
+  //     Username: name,
+  //     Pool: this.userPool,
+  //   };
 
-    const newUser = new CognitoUser(userData);
+  //   const newUser = new CognitoUser(userData);
 
-    return new Promise((resolve, reject) => {
-      return newUser.authenticateUser(authenticationDetails, {
-        onSuccess: () => {
-          newUser.changePassword(currentPassword, newPassword, (err, result) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            resolve(result);
-          });
-        },
-        onFailure: (err) => {
-          reject(err);
-        },
-      });
-    });
-  }
+  //   return new Promise((resolve, reject) => {
+  //     return newUser.authenticateUser(authenticationDetails, {
+  //       onSuccess: (result) => {
+  //         resolve(result);
+  //       },
+  //       onFailure: (err) => {
+  //         reject(err);
+  //       },
+  //     });
+  //   });
+  // }
+
+  // async changePassword(data: ChangePasswordDto) {
+  //   const { email, currentPassword, newPassword } = data;
+  //   const authenticationDetails = new AuthenticationDetails({
+  //     Username: email,
+  //     Password: currentPassword,
+  //   });
+
+  //   const userData = {
+  //     Username: email,
+  //     Pool: this.userPool,
+  //   };
+
+  //   const newUser = new CognitoUser(userData);
+
+  //   return new Promise((resolve, reject) => {
+  //     return newUser.authenticateUser(authenticationDetails, {
+  //       onSuccess: () => {
+  //         newUser.changePassword(currentPassword, newPassword, (err, result) => {
+  //           if (err) {
+  //             reject(err);
+  //             return;
+  //           }
+  //           resolve(result);
+  //         });
+  //       },
+  //       onFailure: (err) => {
+  //         reject(err);
+  //       },
+  //     });
+  //   });
+  // }
 
   async validateUser(email: string, password: string) {
-    const user = await this.userRepos.findOne({ email: email, password: password });
+    const user = await this.userService.getUserByAuth({ email: email, password});
     return user;
   }
 
   async login(params: LoginDto) {
-    const user = await this.userRepos.findOne({
+    const user = await this.userService.getUser({
       email: params.email,
       password: params.password,
     });
@@ -191,7 +168,7 @@ export class AuthService {
       throw new Error('Unauthorized');
     }
 
-    const user = await this.userRepos.findOne({
+    const user = await this.userService.getUser({
       id: decoded.sub,
       email: decoded.email,
     });
@@ -225,46 +202,46 @@ export class AuthService {
     };
   }
 
-  async forgotPassword(email: string) {
-    const userData = {
-      Username: email,
-      Pool: this.userPool,
-    };
+  // async forgotPassword(email: string) {
+  //   const userData = {
+  //     Username: email,
+  //     Pool: this.userPool,
+  //   };
 
-    const userPool = new CognitoUser(userData);
+  //   const userPool = new CognitoUser(userData);
 
-    return new Promise((resolve, reject) => {
-      return userPool.forgotPassword({
-        onSuccess: (result) => {
-          resolve(result);
-        },
-        onFailure: (err) => {
-          reject(err);
-        },
-      });
-    });
-  }
+  //   return new Promise((resolve, reject) => {
+  //     return userPool.forgotPassword({
+  //       onSuccess: (result) => {
+  //         resolve(result);
+  //       },
+  //       onFailure: (err) => {
+  //         reject(err);
+  //       },
+  //     });
+  //   });
+  // }
 
 
-  async confirmNewPassword(confirmPassword: ConfirmPasswordDto) {
-    const { email, confirmCode, newPassword } = confirmPassword;
+  // async confirmNewPassword(confirmPassword: ConfirmPasswordDto) {
+  //   const { email, confirmCode, newPassword } = confirmPassword;
 
-    const userData = {
-      Username: email,
-      Pool: this.userPool,
-    };
+  //   const userData = {
+  //     Username: email,
+  //     Pool: this.userPool,
+  //   };
 
-    const userPool = new CognitoUser(userData);
+  //   const userPool = new CognitoUser(userData);
 
-    return new Promise((resolve, reject) => {
-      return userPool.confirmPassword(confirmCode, newPassword,{
-        onSuccess: (result) => {
-          resolve(result);
-        },
-        onFailure: (err) => {
-          reject(err);
-        },
-      });
-    });
-  }
+  //   return new Promise((resolve, reject) => {
+  //     return userPool.confirmPassword(confirmCode, newPassword,{
+  //       onSuccess: (result) => {
+  //         resolve(result);
+  //       },
+  //       onFailure: (err) => {
+  //         reject(err);
+  //       },
+  //     });
+  //   });
+  // }
 }

@@ -1,4 +1,3 @@
-import { UploadFileDto } from './../user/dto/upload-file.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -16,38 +15,38 @@ export class FileService {
     private readonly configService: ApiConfigService,
   ) {}
 
-  async getAllFiles(userId: number) {
-    const files = await this.fileRepos.find({ userId: userId });
+  // async getAllFiles(userId: number) {
+  //   const files = await this.fileRepos.find({ userId: userId });
 
-    return files;
-  }
+  //   return files;
+  // }
 
-  async uploadFile(userId: number, fileName: string, data: Buffer) {
-    const s3 = new S3();
-    const uploadResult = await s3
-      .upload({
-        Bucket: this.configService.getAWSConfig().bucketName,
-        Body: data,
-        Key: `${uuid()}-${fileName}`,
-      })
-      .promise();
+  // async uploadFile(userId: number, fileName: string, data: Buffer) {
+  //   const s3 = new S3();
+  //   const uploadResult = await s3
+  //     .upload({
+  //       Bucket: this.configService.getAWSConfig().bucketName,
+  //       Body: data,
+  //       Key: `${uuid()}-${fileName}`,
+  //     })
+  //     .promise();
 
-    const newFile = this.fileRepos.save({
-      userId: userId,
-      key: uploadResult.Key,
-      url: uploadResult.Location,
-    });
+  //   const newFile = this.fileRepos.save({
+  //     userId: userId,
+  //     key: uploadResult.Key,
+  //     url: uploadResult.Location,
+  //   });
 
-    return newFile;
-  }
+  //   return newFile;
+  // }
 
-  async generateUrl(key: string) {
-    const s3 = new S3();
-    const url = await s3.getSignedUrlPromise('getObject', {
-      Bucket: this.configService.getAWSConfig().bucketName,
-      Key: key,
-    });
+  // async generateUrl(key: string) {
+  //   const s3 = new S3();
+  //   const url = await s3.getSignedUrlPromise('getObject', {
+  //     Bucket: this.configService.getAWSConfig().bucketName,
+  //     Key: key,
+  //   });
 
-    return url;
-  }
+  //   return url;
+  // }
 }

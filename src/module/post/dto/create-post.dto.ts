@@ -11,9 +11,4 @@ export class CreatePostDto{
     @IsNotEmpty()
     @IsString()
     content:string;
-
-    @ApiProperty({ required: true })
-    @IsNotEmpty()
-    @IsString()
-    url:string;
 }

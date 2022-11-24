@@ -10,6 +10,7 @@ import { SharedModule } from "../../config/share.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { User, Token } from '../../database/entities';
 import { LocalStrategy } from "./strategy";
+import { UserService } from "../user";
 @Module({
     imports: [
         DatabaseModule,
@@ -27,7 +28,7 @@ import { LocalStrategy } from "./strategy";
         TypeOrmModule.forFeature([ User, Token ]),
     ],
     controllers: [AuthController],
-    providers: [AuthService, ApiConfigService, LocalStrategy],
+    providers: [AuthService, ApiConfigService, LocalStrategy, UserService],
     exports: [],
 })
 export class AuthModule {}

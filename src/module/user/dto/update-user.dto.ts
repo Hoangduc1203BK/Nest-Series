@@ -6,29 +6,24 @@ export class UpdateUserDto{
     @IsNotEmpty()
     @IsString()
     @IsOptional()
+    @IsEmail()
     email:string;
 
     @ApiProperty({ required: false })
     @IsNotEmpty()
     @IsString()
     @IsOptional()
-    username:string;
+    name:string;
 
     @ApiProperty({ required: false })
     @IsNotEmpty()
     @IsString()
     @IsOptional()
-    phoneNumber:string;
-    
-    @ApiProperty({ required: false })
-    @IsNotEmpty()
-    @IsOptional()
-    @IsNumber()
-    age:string;
+    birthDate:string;
 
     @ApiProperty({ required: false })
     @IsNotEmpty()
     @IsString()
     @IsOptional()
-    address: string;
+    address:string;
 }

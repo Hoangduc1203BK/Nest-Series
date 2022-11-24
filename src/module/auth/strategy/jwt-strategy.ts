@@ -1,34 +1,31 @@
-import { AuthService } from '../auth.service';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { User } from '../../../database/entities';
+import { UserService } from 'src/module/user';
 import { ApiConfigService } from 'src/config/api-config.service';
-import { passportJwtSecret } from 'jwks-rsa';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     @InjectRepository(User)
-    private readonly userRepos: Repository<User>,
-    private readonly configService: ApiConfigService,
+    private readonly userService: UserService,
+    private readonly configService: ApiConfigService
   ) {
     super({
-      secretOrKeyProvider: passportJwtSecret({
-        cache: true,
-        rateLimit: true,
-        jwksRequestsPerMinute: 10,
-        jwksUri: `${configService.getCognitoConfig().authority}/.well-known/jwks.json`,
-      }),
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      issuer: configService.getCognitoConfig().authority,
-      algorithms: ['RS256']
+      ignoreExpiration: false,
+      secretOrKey: configService.getAuthConfig().secret,
     });
   }
 
   async validate(payload: any) {
-    return {username: payload.sub, email: payload.email};
+    const { sub, email } = payload;
+    const user = await this.userService.getUserByAuth({ email: email, id: sub})
+
+    if(!user) {
+      throw UnauthorizedException;
+    }
   }
 }

@@ -6,17 +6,23 @@ import { JwtAuthGuard } from './guard/jwt.guard';
 import { Request, Response } from 'express';
 import { RegisterDto, LoginDto, ConfirmRegistrationDto } from './dto';
 import { ApiConfigService } from '../../config/api-config.service';
-import { ChangePasswordDto } from '../user/dto';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService, private readonly configService: ApiConfigService) {}
 
-  @Post('confirm-registration')
-  async confirmRegistration(@Body() payload: ConfirmRegistrationDto) {
-    const result = await this.authService.confirmRegistration(payload);
+  // @Post('confirm-registration')
+  // async confirmRegistration(@Body() payload: ConfirmRegistrationDto) {
+  //   const result = await this.authService.confirmRegistration(payload);
 
-    return result;
-  }
+  //   return result;
+  // }
+
+  // @Post('resend-confirm-code')
+  // async resendConfirmCode(@Body('email') email: string) {
+  //   const result = await this.authService.resendCode(email);
+
+  //   return result;
+  // }
 
   @Post('register')
   async register(@Body() payload: RegisterDto) {
@@ -26,12 +32,12 @@ export class AuthController {
     return result;
   }
 
-  @Post('authenticate')
-  async authenticate(@Body() data: any) {
-    const result = await this.authService.authenticate(data.name, data.password);
+  // @Post('authenticate')
+  // async authenticate(@Body() data: any) {
+  //   const result = await this.authService.authenticate(data.name, data.password);
 
-    return result;
-  }
+  //   return result;
+  // }
 
   @UseGuards(LocalAuthGuard)
   @Post('/login')
@@ -55,27 +61,27 @@ export class AuthController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
-    @Post('/change-password')
-    async changePassword(@Body() data: ChangePasswordDto) {
-        const result = await this.authService.changePassword(data);
+  // @UseGuards(JwtAuthGuard)
+  //   @Post('/change-password')
+  //   async changePassword(@Body() data: ChangePasswordDto) {
+  //       const result = await this.authService.changePassword(data);
 
-        return result;
-    }
+  //       return result;
+  //   }
 
-    @UseGuards(JwtAuthGuard)
-    @Post('/forgot-password')
-    async forgetPassword(@Body('email') email: string) {
-        const result = await this.authService.forgotPassword(email);
+  //   @UseGuards(JwtAuthGuard)
+  //   @Post('/forgot-password')
+  //   async forgetPassword(@Body('email') email: string) {
+  //       const result = await this.authService.forgotPassword(email);
 
-        return result;
-    }
+  //       return result;
+  //   }
 
-    // @UseGuards(JwtAuthGuard)
-    @Post('/confirm-password')
-    async confirmPassword(@Body() data: ConfirmPasswordDto) {
-        const result = await this.authService.confirmNewPassword(data);
+  //   // @UseGuards(JwtAuthGuard)
+  //   @Post('/confirm-password')
+  //   async confirmPassword(@Body() data: ConfirmPasswordDto) {
+  //       const result = await this.authService.confirmNewPassword(data);
 
-        return result;
-    }
+  //       return result;
+  //   }
 }

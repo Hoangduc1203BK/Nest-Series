@@ -1,19 +1,11 @@
-import { PrivateFilesModule } from './../upload/upload.module';
-import { UserController } from './user.controller';
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserService } from './user.service';
-import { User,File } from '../../database/entities';
-import { JwtStrategy } from '../auth/strategy/jwt-strategy';
-import { DynamoDBConfig } from '../../database/database.config';
+import { Module } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { User } from "src/database/entities";
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User,File]),
-    PrivateFilesModule,
-  ],
-  controllers: [UserController],
-  providers: [UserService, JwtStrategy, DynamoDBConfig],
-  exports: [UserService]
+  imports: [TypeOrmModule.forFeature([User])],
+  controllers: [],
+  providers: [],
+  exports: [],
 })
-export class UserModule {};
+export class UserModule{};
