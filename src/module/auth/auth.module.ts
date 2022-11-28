@@ -9,7 +9,7 @@ import { ApiConfigService } from "../../config/api-config.service";
 import { SharedModule } from "../../config/share.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { User, Token } from '../../database/entities';
-import { LocalStrategy } from "./strategy";
+import { JwtStrategy, LocalStrategy } from "./strategy";
 import { UserService } from "../user";
 @Module({
     imports: [
@@ -28,7 +28,7 @@ import { UserService } from "../user";
         TypeOrmModule.forFeature([ User, Token ]),
     ],
     controllers: [AuthController],
-    providers: [AuthService, ApiConfigService, LocalStrategy, UserService],
+    providers: [AuthService, ApiConfigService, LocalStrategy,JwtStrategy, UserService],
     exports: [],
 })
 export class AuthModule {}
